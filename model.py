@@ -39,13 +39,13 @@ class Generator(nn.Module):
         
         
     
-class Descriminator(nn.Module):
+class Critic(nn.Module):
     """
     Classify image => real or fake
     """
     def __init__(self):
         super().__init__()
-        self.descriminator = nn.Sequential(
+        self.critic = nn.Sequential(
             
             # (inp + 1)/stride + 2*padding - kernal
             nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, stride=1, padding='same'), # (3, 28, 28) -> (64, 28, 28)
@@ -67,52 +67,5 @@ class Descriminator(nn.Module):
     
     def forward(self, img_batch):
         assert img_batch.shape[1:] == torch.Size([1, 28, 28]), 'the size of the image should (b, 1, 28, 28)' 
-        predictions = self.descriminator(img_batch)
+        predictions = self.critic(img_batch)
         return predictions
-        
-    
-class DCGAN(nn.Module):
-    """
-    GAN model
-    """
-    def __init__(self,generator: Generator, descriminator: Descriminator, batch_size, device):
-        super().__init__()
-        self.generator = generator
-        self.descriminator = descriminator
-        self.batch_size = batch_size
-        self.device = device
-    
-    def generate_image_batch(self, batch_size):
-        return self.generator(batch_size)
-    
-    def descriminate_batch(self, img_batch):
-        return self.descriminator(img_batch)
-    
-    def forward(self, x):
-        fake_img_batch = self.generate_image_batch(self.batch_size) # (B, C, W, H)
-        real_img_batch = x # real image comes from the dataset
-        
-        real_labels = torch.ones(size=(self.batch_size, ), device=self.device)
-        fake_labels = torch.zeros(size=(self.batch_size, ), device=self.device)
-        
-        # Descriminate
-        real_desc_pred = self.descriminator(real_img_batch).squeeze() # (5, 1)
-        fake_desc_pred = self.descriminator(fake_img_batch).squeeze() # Descrimating Generated image
-        
-        # Descriminator
-        real_desc_loss = F.binary_cross_entropy(real_desc_pred, real_labels)
-        fake_desc_loss = F.binary_cross_entropy(fake_desc_pred, fake_labels)
-        descriminator_loss = (real_desc_loss + fake_desc_loss) / 2.0 # average
-        # Generator loss
-        generator_loss = F.binary_cross_entropy(fake_desc_pred, real_labels)
-        return generator_loss, descriminator_loss
-        
-        
-def build_model(latent_dim, batch_size):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    descriminator = Descriminator()
-    generator = Generator(latent_dim=latent_dim)
-    
-    model = DCGAN(generator, descriminator, batch_size, device=device)
-    
-    return model
