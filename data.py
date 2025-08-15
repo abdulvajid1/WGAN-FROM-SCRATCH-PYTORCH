@@ -13,8 +13,8 @@ def load_data(train_batch_size=8, test_batch_size=2, sample_size=60000):
     test_dataset = FashionMNIST(root='data/', train=False, transform=transform, download=True)
     
     train_dataset = Subset(train_dataset, range(sample_size))
-    train_loader = DataLoader(dataset=train_dataset, batch_size=train_batch_size, shuffle=True)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=test_batch_size, shuffle=False)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=train_batch_size, shuffle=True, drop_last=True)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=test_batch_size, shuffle=False, drop_last=True)
     
     return train_loader, test_loader
 
