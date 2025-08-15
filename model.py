@@ -31,9 +31,7 @@ class Generator(nn.Module):
         )
         
     
-    def forward(self, batch_size):
-        latent_inp = torch.randn(size=(batch_size, self.latent_dim)).to(self.device) # (b, h)
-        x = torch.unsqueeze(torch.unsqueeze(latent_inp, dim=-1), dim=-1) # (b, h, 1, 1)
+    def forward(self, x):
         return self.seq_pipe(x)
         
         
