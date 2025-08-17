@@ -32,7 +32,7 @@ class Generator(nn.Module):
         return nn.Sequential(
             nn.ConvTranspose2d(inp, out, kernel, stride, padding, bias=False),
             nn.BatchNorm2d(out),
-            nn.ReLU(True)  # ReLU works better than LeakyReLU in G
+            nn.LeakyReLU(0.2)  # ReLU works better than LeakyReLU in G
         )
 
     def forward(self, x):
